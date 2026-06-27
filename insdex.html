@@ -1,0 +1,858 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>J&M Web Studio — CRM</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #0d0f12;
+    --surface: #161a1f;
+    --surface2: #1e2329;
+    --border: #272d35;
+    --border2: #313a44;
+    --accent: #4f8ef7;
+    --accent2: #2563eb;
+    --accent-glow: rgba(79,142,247,0.15);
+    --text: #e8ecf1;
+    --text2: #8b95a1;
+    --text3: #576070;
+    --green: #22c55e;
+    --green-bg: rgba(34,197,94,0.1);
+    --yellow: #f59e0b;
+    --yellow-bg: rgba(245,158,11,0.1);
+    --red: #ef4444;
+    --red-bg: rgba(239,68,68,0.1);
+    --blue: #4f8ef7;
+    --blue-bg: rgba(79,142,247,0.1);
+    --purple: #a855f7;
+    --purple-bg: rgba(168,85,247,0.1);
+    --radius: 8px;
+    --radius-lg: 12px;
+  }
+
+  body {
+    font-family: 'Inter', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    font-size: 14px;
+    line-height: 1.5;
+  }
+
+  /* HEADER */
+  header {
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    padding: 0 24px;
+    height: 56px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+  .logo {
+    font-family: 'DM Mono', monospace;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--accent);
+    letter-spacing: 0.05em;
+  }
+  .logo span { color: var(--text3); }
+  .header-right { display: flex; align-items: center; gap: 12px; }
+  .stats-pill {
+    display: flex;
+    gap: 16px;
+    padding: 6px 14px;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    font-size: 12px;
+  }
+  .stat-item { display: flex; align-items: center; gap: 5px; color: var(--text2); }
+  .stat-dot { width: 6px; height: 6px; border-radius: 50%; }
+
+  /* MAIN LAYOUT */
+  main { max-width: 1200px; margin: 0 auto; padding: 28px 24px; }
+
+  /* TOOLBAR */
+  .toolbar {
+    display: flex;
+    gap: 12px;
+    margin-bottom: 20px;
+    align-items: center;
+    flex-wrap: wrap;
+  }
+  .search-wrap {
+    flex: 1;
+    min-width: 200px;
+    position: relative;
+  }
+  .search-wrap input {
+    width: 100%;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 9px 12px 9px 36px;
+    color: var(--text);
+    font-size: 13px;
+    font-family: 'Inter', sans-serif;
+    outline: none;
+    transition: border-color .2s;
+  }
+  .search-wrap input:focus { border-color: var(--accent); }
+  .search-wrap input::placeholder { color: var(--text3); }
+  .search-icon {
+    position: absolute;
+    left: 11px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--text3);
+    pointer-events: none;
+  }
+  select {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 9px 12px;
+    color: var(--text);
+    font-size: 13px;
+    font-family: 'Inter', sans-serif;
+    outline: none;
+    cursor: pointer;
+    transition: border-color .2s;
+  }
+  select:focus { border-color: var(--accent); }
+  .btn-primary {
+    background: var(--accent);
+    border: none;
+    border-radius: var(--radius);
+    padding: 9px 16px;
+    color: #fff;
+    font-size: 13px;
+    font-family: 'Inter', sans-serif;
+    font-weight: 600;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    white-space: nowrap;
+    transition: background .2s, transform .1s;
+  }
+  .btn-primary:hover { background: var(--accent2); }
+  .btn-primary:active { transform: scale(0.97); }
+
+  /* TABLE */
+  .table-wrap {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+  }
+  table { width: 100%; border-collapse: collapse; }
+  thead {
+    background: var(--surface2);
+    border-bottom: 1px solid var(--border);
+  }
+  th {
+    padding: 10px 14px;
+    text-align: left;
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--text3);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    white-space: nowrap;
+  }
+  td {
+    padding: 13px 14px;
+    border-bottom: 1px solid var(--border);
+    vertical-align: middle;
+  }
+  tr:last-child td { border-bottom: none; }
+  tr:hover td { background: rgba(255,255,255,0.015); }
+
+  .negocio-name { font-weight: 600; color: var(--text); font-size: 13px; }
+  .negocio-dir { font-size: 12px; color: var(--text3); margin-top: 2px; }
+
+  .badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 3px 9px;
+    border-radius: 20px;
+    font-size: 11px;
+    font-weight: 600;
+    white-space: nowrap;
+  }
+  .badge-dot { width: 5px; height: 5px; border-radius: 50%; }
+
+  .badge-contactar { background: var(--blue-bg); color: var(--blue); }
+  .badge-contactar .badge-dot { background: var(--blue); }
+  .badge-contactado { background: var(--yellow-bg); color: var(--yellow); }
+  .badge-contactado .badge-dot { background: var(--yellow); }
+  .badge-interesado { background: var(--purple-bg); color: var(--purple); }
+  .badge-interesado .badge-dot { background: var(--purple); }
+  .badge-cerrado { background: var(--green-bg); color: var(--green); }
+  .badge-cerrado .badge-dot { background: var(--green); }
+  .badge-descartado { background: rgba(239,68,68,0.1); color: var(--red); }
+  .badge-descartado .badge-dot { background: var(--red); }
+
+  .rubro-tag {
+    display: inline-flex;
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-size: 11px;
+    font-weight: 500;
+    background: var(--surface2);
+    color: var(--text2);
+    border: 1px solid var(--border);
+  }
+
+  .contact-cell { font-size: 12px; color: var(--text2); }
+  .contact-cell a { color: var(--accent); text-decoration: none; }
+  .contact-cell a:hover { text-decoration: underline; }
+
+  .servicio-cell { font-size: 12px; color: var(--text2); max-width: 180px; }
+
+  .nota-cell { font-size: 12px; color: var(--text3); font-style: italic; max-width: 160px; }
+
+  .actions { display: flex; gap: 6px; align-items: center; }
+  .btn-icon {
+    background: transparent;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    width: 28px;
+    height: 28px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    color: var(--text3);
+    transition: all .2s;
+    font-size: 13px;
+  }
+  .btn-icon:hover { border-color: var(--accent); color: var(--accent); background: var(--accent-glow); }
+  .btn-icon.danger:hover { border-color: var(--red); color: var(--red); background: var(--red-bg); }
+
+  .status-select {
+    background: transparent;
+    border: none;
+    padding: 0;
+    font-size: 12px;
+    cursor: pointer;
+    outline: none;
+    appearance: none;
+  }
+
+  /* EMPTY STATE */
+  .empty-state {
+    text-align: center;
+    padding: 60px 20px;
+    color: var(--text3);
+  }
+  .empty-state svg { margin-bottom: 14px; opacity: 0.3; }
+  .empty-state p { font-size: 14px; margin-bottom: 6px; color: var(--text2); }
+  .empty-state span { font-size: 12px; }
+
+  /* MODAL */
+  .modal-overlay {
+    position: fixed; inset: 0;
+    background: rgba(0,0,0,0.7);
+    display: flex; align-items: center; justify-content: center;
+    z-index: 200;
+    opacity: 0; pointer-events: none;
+    transition: opacity .2s;
+    backdrop-filter: blur(4px);
+  }
+  .modal-overlay.open { opacity: 1; pointer-events: all; }
+  .modal {
+    background: var(--surface);
+    border: 1px solid var(--border2);
+    border-radius: var(--radius-lg);
+    width: 100%;
+    max-width: 520px;
+    margin: 20px;
+    transform: translateY(8px);
+    transition: transform .2s;
+    max-height: 90vh;
+    overflow-y: auto;
+  }
+  .modal-overlay.open .modal { transform: translateY(0); }
+  .modal-header {
+    padding: 20px 24px 16px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .modal-header h2 { font-size: 15px; font-weight: 600; }
+  .modal-body { padding: 20px 24px; display: flex; flex-direction: column; gap: 14px; }
+  .modal-footer {
+    padding: 14px 24px;
+    border-top: 1px solid var(--border);
+    display: flex;
+    gap: 10px;
+    justify-content: flex-end;
+  }
+  .form-group { display: flex; flex-direction: column; gap: 5px; }
+  .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  label { font-size: 11px; font-weight: 600; color: var(--text3); letter-spacing: 0.06em; text-transform: uppercase; }
+  input[type="text"], input[type="tel"], textarea, .modal select {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 9px 12px;
+    color: var(--text);
+    font-size: 13px;
+    font-family: 'Inter', sans-serif;
+    outline: none;
+    width: 100%;
+    transition: border-color .2s;
+  }
+  input[type="text"]:focus, input[type="tel"]:focus, textarea:focus, .modal select:focus {
+    border-color: var(--accent);
+  }
+  textarea { resize: vertical; min-height: 70px; }
+  .btn-secondary {
+    background: transparent;
+    border: 1px solid var(--border2);
+    border-radius: var(--radius);
+    padding: 9px 16px;
+    color: var(--text2);
+    font-size: 13px;
+    font-family: 'Inter', sans-serif;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all .2s;
+  }
+  .btn-secondary:hover { border-color: var(--text3); color: var(--text); }
+
+  /* TOAST */
+  .toast {
+    position: fixed;
+    bottom: 24px;
+    right: 24px;
+    background: var(--surface2);
+    border: 1px solid var(--border2);
+    border-radius: var(--radius);
+    padding: 12px 16px;
+    font-size: 13px;
+    color: var(--text);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transform: translateY(80px);
+    opacity: 0;
+    transition: all .3s;
+    z-index: 300;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.4);
+  }
+  .toast.show { transform: translateY(0); opacity: 1; }
+  .toast-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--green); flex-shrink: 0; }
+
+  /* KANBAN BTN */
+  .view-toggle {
+    display: flex;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    overflow: hidden;
+  }
+  .view-btn {
+    background: transparent;
+    border: none;
+    padding: 8px 12px;
+    cursor: pointer;
+    color: var(--text3);
+    font-size: 13px;
+    transition: all .2s;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+  }
+  .view-btn.active { background: var(--surface); color: var(--text); }
+
+  /* KANBAN */
+  .kanban-board {
+    display: none;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 14px;
+    margin-top: 0;
+  }
+  .kanban-board.visible { display: grid; }
+  .table-wrap.hidden { display: none; }
+
+  .kanban-col {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+    min-height: 300px;
+  }
+  .kanban-col-header {
+    padding: 10px 12px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: var(--surface2);
+  }
+  .kanban-col-title { font-size: 11px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; }
+  .kanban-count {
+    background: var(--border2);
+    border-radius: 10px;
+    padding: 1px 7px;
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--text2);
+    font-family: 'DM Mono', monospace;
+  }
+  .kanban-cards { padding: 10px; display: flex; flex-direction: column; gap: 8px; }
+  .kanban-card {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 10px 12px;
+    cursor: pointer;
+    transition: border-color .2s, transform .1s;
+  }
+  .kanban-card:hover { border-color: var(--border2); transform: translateY(-1px); }
+  .kanban-card-name { font-size: 12px; font-weight: 600; color: var(--text); margin-bottom: 4px; }
+  .kanban-card-rubro { font-size: 11px; color: var(--text3); margin-bottom: 6px; }
+  .kanban-card-contact { font-size: 11px; color: var(--text2); }
+  .kanban-empty { padding: 20px 12px; text-align: center; font-size: 11px; color: var(--text3); }
+
+  @media (max-width: 900px) {
+    .kanban-board { grid-template-columns: repeat(2, 1fr); }
+    th:nth-child(5), td:nth-child(5),
+    th:nth-child(6), td:nth-child(6) { display: none; }
+  }
+  @media (max-width: 600px) {
+    .kanban-board { grid-template-columns: 1fr; }
+    th:nth-child(4), td:nth-child(4) { display: none; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">J&M<span>/</span>studio <span style="color:var(--text3);font-size:11px;margin-left:6px;">CRM</span></div>
+  <div class="header-right">
+    <div class="stats-pill">
+      <div class="stat-item"><div class="stat-dot" style="background:var(--blue)"></div><span id="stat-total">0</span> total</div>
+      <div class="stat-item"><div class="stat-dot" style="background:var(--yellow)"></div><span id="stat-contactado">0</span> contactados</div>
+      <div class="stat-item"><div class="stat-dot" style="background:var(--purple)"></div><span id="stat-interesado">0</span> interesados</div>
+      <div class="stat-item"><div class="stat-dot" style="background:var(--green)"></div><span id="stat-cerrado">0</span> cerrados</div>
+    </div>
+  </div>
+</header>
+
+<main>
+  <div class="toolbar">
+    <div class="search-wrap">
+      <svg class="search-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+      <input type="text" id="search" placeholder="Buscar negocio, rubro, contacto...">
+    </div>
+    <select id="filter-status">
+      <option value="">Todos los estados</option>
+      <option value="contactar">A contactar</option>
+      <option value="contactado">Contactado</option>
+      <option value="interesado">Interesado</option>
+      <option value="cerrado">Cerrado</option>
+      <option value="descartado">Descartado</option>
+    </select>
+    <select id="filter-rubro">
+      <option value="">Todos los rubros</option>
+    </select>
+    <div class="view-toggle">
+      <button class="view-btn active" id="btn-table" onclick="setView('table')">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M3 15h18M9 3v18"/></svg>
+        Lista
+      </button>
+      <button class="view-btn" id="btn-kanban" onclick="setView('kanban')">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="5" height="18" rx="1"/><rect x="10" y="3" width="5" height="12" rx="1"/><rect x="17" y="3" width="5" height="15" rx="1"/></svg>
+        Kanban
+      </button>
+    </div>
+    <button class="btn-primary" onclick="openModal()">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 5v14M5 12h14"/></svg>
+      Nuevo prospecto
+    </button>
+  </div>
+
+  <!-- TABLE VIEW -->
+  <div class="table-wrap" id="table-view">
+    <table>
+      <thead>
+        <tr>
+          <th>Negocio</th>
+          <th>Rubro</th>
+          <th>Contacto</th>
+          <th>Servicio a ofrecer</th>
+          <th>Notas</th>
+          <th>Estado</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody id="tbody"></tbody>
+    </table>
+    <div class="empty-state" id="empty-state" style="display:none">
+      <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2"/><rect x="9" y="3" width="6" height="4" rx="1"/><path d="M9 12h6M9 16h4"/></svg>
+      <p>No hay prospectos aún</p>
+      <span>Hacé clic en "Nuevo prospecto" para agregar uno</span>
+    </div>
+  </div>
+
+  <!-- KANBAN VIEW -->
+  <div class="kanban-board" id="kanban-view">
+    <div class="kanban-col">
+      <div class="kanban-col-header">
+        <span class="kanban-col-title" style="color:var(--blue)">A contactar</span>
+        <span class="kanban-count" id="k-count-contactar">0</span>
+      </div>
+      <div class="kanban-cards" id="k-contactar"></div>
+    </div>
+    <div class="kanban-col">
+      <div class="kanban-col-header">
+        <span class="kanban-col-title" style="color:var(--yellow)">Contactado</span>
+        <span class="kanban-count" id="k-count-contactado">0</span>
+      </div>
+      <div class="kanban-cards" id="k-contactado"></div>
+    </div>
+    <div class="kanban-col">
+      <div class="kanban-col-header">
+        <span class="kanban-col-title" style="color:var(--purple)">Interesado</span>
+        <span class="kanban-count" id="k-count-interesado">0</span>
+      </div>
+      <div class="kanban-cards" id="k-interesado"></div>
+    </div>
+    <div class="kanban-col">
+      <div class="kanban-col-header">
+        <span class="kanban-col-title" style="color:var(--green)">Cerrado</span>
+        <span class="kanban-count" id="k-count-cerrado">0</span>
+      </div>
+      <div class="kanban-cards" id="k-cerrado"></div>
+    </div>
+    <div class="kanban-col">
+      <div class="kanban-col-header">
+        <span class="kanban-col-title" style="color:var(--red)">Descartado</span>
+        <span class="kanban-count" id="k-count-descartado">0</span>
+      </div>
+      <div class="kanban-cards" id="k-descartado"></div>
+    </div>
+  </div>
+</main>
+
+<!-- MODAL -->
+<div class="modal-overlay" id="modal-overlay" onclick="closeModalOutside(event)">
+  <div class="modal">
+    <div class="modal-header">
+      <h2 id="modal-title">Nuevo prospecto</h2>
+      <button class="btn-icon" onclick="closeModal()">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6 6 18M6 6l12 12"/></svg>
+      </button>
+    </div>
+    <div class="modal-body">
+      <div class="form-row">
+        <div class="form-group">
+          <label>Nombre del negocio *</label>
+          <input type="text" id="f-nombre" placeholder="Ej: Ferretería El Martillo">
+        </div>
+        <div class="form-group">
+          <label>Rubro *</label>
+          <input type="text" id="f-rubro" placeholder="Ej: Ferretería">
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Dirección / Zona</label>
+          <input type="text" id="f-direccion" placeholder="Ej: Av. Corrientes 1234, CABA">
+        </div>
+        <div class="form-group">
+          <label>WhatsApp / Teléfono</label>
+          <input type="tel" id="f-wsp" placeholder="Ej: 11 1234-5678">
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Instagram / Facebook</label>
+          <input type="text" id="f-social" placeholder="Ej: @ferreteria_elmartillo">
+        </div>
+        <div class="form-group">
+          <label>Email</label>
+          <input type="text" id="f-email" placeholder="Ej: contacto@negocio.com">
+        </div>
+      </div>
+      <div class="form-group">
+        <label>Servicio a ofrecer</label>
+        <input type="text" id="f-servicio" placeholder="Ej: Web catálogo + sistema de stock">
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Estado</label>
+          <select id="f-status" class="modal">
+            <option value="contactar">A contactar</option>
+            <option value="contactado">Contactado</option>
+            <option value="interesado">Interesado</option>
+            <option value="cerrado">Cerrado ✅</option>
+            <option value="descartado">Descartado</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Canal de contacto</label>
+          <select id="f-canal" class="modal">
+            <option value="">— Seleccionar —</option>
+            <option value="WhatsApp">WhatsApp</option>
+            <option value="Instagram DM">Instagram DM</option>
+            <option value="Email">Email</option>
+            <option value="Presencial">Presencial</option>
+            <option value="Llamada">Llamada</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-group">
+        <label>Notas</label>
+        <textarea id="f-notas" placeholder="Ej: Habló con el dueño, le interesa la web, pide presupuesto..."></textarea>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-secondary" onclick="closeModal()">Cancelar</button>
+      <button class="btn-primary" onclick="saveProspecto()">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+        Guardar
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast">
+  <div class="toast-dot"></div>
+  <span id="toast-msg">Prospecto guardado</span>
+</div>
+
+<script>
+  let prospectos = JSON.parse(localStorage.getItem('jm_crm') || '[]');
+  let editingId = null;
+  let currentView = 'table';
+
+  const SAMPLE = [
+    { id: 1, nombre: 'Ferretería Bases', rubro: 'Ferretería', direccion: 'Av. Fray Manuel de Torres 129, Luján', wsp: '2323 000000', social: '', email: '', servicio: 'Web catálogo + sistema de stock', status: 'contactar', canal: 'WhatsApp', notas: 'Sin web ni redes activas', fecha: Date.now() },
+    { id: 2, nombre: 'La Rotisería Luján', rubro: 'Gastronomía', direccion: 'Lavalle 301, Luján', wsp: '', social: '@rotiseria_lujan', email: '', servicio: 'Web con menú + pedidos online', status: 'contactado', canal: 'Instagram DM', notas: 'Atiende por IG, pendiente respuesta', fecha: Date.now() },
+    { id: 3, nombre: 'Taller Mecánico Pedro', rubro: 'Taller mecánico', direccion: 'Palermo, CABA', wsp: '11 4444-5555', social: '', email: '', servicio: 'Web + sistema de turnos y historial', status: 'interesado', canal: 'WhatsApp', notas: 'Dueño interesado, pide presupuesto', fecha: Date.now() },
+  ];
+
+  if (prospectos.length === 0) prospectos = SAMPLE;
+
+  function save() { localStorage.setItem('jm_crm', JSON.stringify(prospectos)); }
+  function genId() { return Date.now() + Math.random(); }
+
+  function getStatusLabel(s) {
+    return { contactar:'A contactar', contactado:'Contactado', interesado:'Interesado', cerrado:'Cerrado', descartado:'Descartado' }[s] || s;
+  }
+
+  function renderBadge(s) {
+    return `<span class="badge badge-${s}"><span class="badge-dot"></span>${getStatusLabel(s)}</span>`;
+  }
+
+  function getFiltered() {
+    const q = document.getElementById('search').value.toLowerCase();
+    const fs = document.getElementById('filter-status').value;
+    const fr = document.getElementById('filter-rubro').value;
+    return prospectos.filter(p => {
+      const matchQ = !q || [p.nombre, p.rubro, p.wsp, p.social, p.email, p.servicio, p.notas].join(' ').toLowerCase().includes(q);
+      const matchS = !fs || p.status === fs;
+      const matchR = !fr || p.rubro === fr;
+      return matchQ && matchS && matchR;
+    });
+  }
+
+  function updateRubroFilter() {
+    const sel = document.getElementById('filter-rubro');
+    const cur = sel.value;
+    const rubros = [...new Set(prospectos.map(p => p.rubro).filter(Boolean))].sort();
+    sel.innerHTML = '<option value="">Todos los rubros</option>' + rubros.map(r => `<option value="${r}"${r===cur?' selected':''}>${r}</option>`).join('');
+  }
+
+  function updateStats(list) {
+    document.getElementById('stat-total').textContent = list.length;
+    document.getElementById('stat-contactado').textContent = list.filter(p=>p.status==='contactado').length;
+    document.getElementById('stat-interesado').textContent = list.filter(p=>p.status==='interesado').length;
+    document.getElementById('stat-cerrado').textContent = list.filter(p=>p.status==='cerrado').length;
+  }
+
+  function render() {
+    updateRubroFilter();
+    const list = getFiltered();
+    updateStats(list);
+    if (currentView === 'table') renderTable(list);
+    else renderKanban(list);
+  }
+
+  function renderTable(list) {
+    const tbody = document.getElementById('tbody');
+    const empty = document.getElementById('empty-state');
+    if (list.length === 0) {
+      tbody.innerHTML = '';
+      empty.style.display = 'block';
+      return;
+    }
+    empty.style.display = 'none';
+    tbody.innerHTML = list.map(p => `
+      <tr>
+        <td>
+          <div class="negocio-name">${p.nombre}</div>
+          ${p.direccion ? `<div class="negocio-dir">📍 ${p.direccion}</div>` : ''}
+        </td>
+        <td><span class="rubro-tag">${p.rubro || '—'}</span></td>
+        <td class="contact-cell">
+          ${p.wsp ? `<div>📱 ${p.wsp}</div>` : ''}
+          ${p.social ? `<div>📷 ${p.social}</div>` : ''}
+          ${p.email ? `<div>✉️ <a href="mailto:${p.email}">${p.email}</a></div>` : ''}
+          ${!p.wsp && !p.social && !p.email ? '—' : ''}
+        </td>
+        <td class="servicio-cell">${p.servicio || '—'}</td>
+        <td class="nota-cell">${p.notas ? (p.notas.length > 60 ? p.notas.slice(0,60)+'…' : p.notas) : '—'}</td>
+        <td>
+          <select class="status-select badge badge-${p.status}" onchange="changeStatus(${p.id}, this.value)">
+            <option value="contactar" ${p.status==='contactar'?'selected':''}>A contactar</option>
+            <option value="contactado" ${p.status==='contactado'?'selected':''}>Contactado</option>
+            <option value="interesado" ${p.status==='interesado'?'selected':''}>Interesado</option>
+            <option value="cerrado" ${p.status==='cerrado'?'selected':''}>Cerrado ✅</option>
+            <option value="descartado" ${p.status==='descartado'?'selected':''}>Descartado</option>
+          </select>
+        </td>
+        <td>
+          <div class="actions">
+            <button class="btn-icon" title="Editar" onclick="editProspecto(${p.id})">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+            </button>
+            <button class="btn-icon danger" title="Eliminar" onclick="deleteProspecto(${p.id})">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>
+            </button>
+          </div>
+        </td>
+      </tr>
+    `).join('');
+  }
+
+  function renderKanban(list) {
+    const cols = ['contactar','contactado','interesado','cerrado','descartado'];
+    cols.forEach(s => {
+      const items = list.filter(p => p.status === s);
+      document.getElementById(`k-count-${s}`).textContent = items.length;
+      const col = document.getElementById(`k-${s}`);
+      if (items.length === 0) {
+        col.innerHTML = '<div class="kanban-empty">Sin prospectos</div>';
+        return;
+      }
+      col.innerHTML = items.map(p => `
+        <div class="kanban-card" onclick="editProspecto(${p.id})">
+          <div class="kanban-card-name">${p.nombre}</div>
+          <div class="kanban-card-rubro">${p.rubro || ''}</div>
+          <div class="kanban-card-contact">${p.wsp || p.social || p.email || '—'}</div>
+          ${p.servicio ? `<div style="font-size:11px;color:var(--accent);margin-top:5px">${p.servicio}</div>` : ''}
+        </div>
+      `).join('');
+    });
+  }
+
+  function changeStatus(id, val) {
+    const p = prospectos.find(x => x.id === id);
+    if (p) { p.status = val; save(); render(); toast('Estado actualizado'); }
+  }
+
+  function openModal(p = null) {
+    editingId = p ? p.id : null;
+    document.getElementById('modal-title').textContent = p ? 'Editar prospecto' : 'Nuevo prospecto';
+    document.getElementById('f-nombre').value = p?.nombre || '';
+    document.getElementById('f-rubro').value = p?.rubro || '';
+    document.getElementById('f-direccion').value = p?.direccion || '';
+    document.getElementById('f-wsp').value = p?.wsp || '';
+    document.getElementById('f-social').value = p?.social || '';
+    document.getElementById('f-email').value = p?.email || '';
+    document.getElementById('f-servicio').value = p?.servicio || '';
+    document.getElementById('f-status').value = p?.status || 'contactar';
+    document.getElementById('f-canal').value = p?.canal || '';
+    document.getElementById('f-notas').value = p?.notas || '';
+    document.getElementById('modal-overlay').classList.add('open');
+    setTimeout(() => document.getElementById('f-nombre').focus(), 100);
+  }
+
+  function closeModal() { document.getElementById('modal-overlay').classList.remove('open'); editingId = null; }
+  function closeModalOutside(e) { if (e.target === document.getElementById('modal-overlay')) closeModal(); }
+
+  function editProspecto(id) {
+    const p = prospectos.find(x => x.id === id);
+    if (p) openModal(p);
+  }
+
+  function deleteProspecto(id) {
+    if (!confirm('¿Eliminar este prospecto?')) return;
+    prospectos = prospectos.filter(x => x.id !== id);
+    save(); render(); toast('Prospecto eliminado');
+  }
+
+  function saveProspecto() {
+    const nombre = document.getElementById('f-nombre').value.trim();
+    const rubro = document.getElementById('f-rubro').value.trim();
+    if (!nombre || !rubro) { alert('Nombre y rubro son obligatorios.'); return; }
+    const data = {
+      nombre,
+      rubro,
+      direccion: document.getElementById('f-direccion').value.trim(),
+      wsp: document.getElementById('f-wsp').value.trim(),
+      social: document.getElementById('f-social').value.trim(),
+      email: document.getElementById('f-email').value.trim(),
+      servicio: document.getElementById('f-servicio').value.trim(),
+      status: document.getElementById('f-status').value,
+      canal: document.getElementById('f-canal').value,
+      notas: document.getElementById('f-notas').value.trim(),
+    };
+    if (editingId) {
+      const idx = prospectos.findIndex(x => x.id === editingId);
+      prospectos[idx] = { ...prospectos[idx], ...data };
+      toast('Prospecto actualizado');
+    } else {
+      prospectos.unshift({ id: genId(), fecha: Date.now(), ...data });
+      toast('Prospecto guardado');
+    }
+    save(); closeModal(); render();
+  }
+
+  function setView(v) {
+    currentView = v;
+    document.getElementById('btn-table').classList.toggle('active', v === 'table');
+    document.getElementById('btn-kanban').classList.toggle('active', v === 'kanban');
+    document.getElementById('table-view').classList.toggle('hidden', v === 'kanban');
+    document.getElementById('kanban-view').classList.toggle('visible', v === 'kanban');
+    render();
+  }
+
+  function toast(msg) {
+    const el = document.getElementById('toast');
+    document.getElementById('toast-msg').textContent = msg;
+    el.classList.add('show');
+    setTimeout(() => el.classList.remove('show'), 2500);
+  }
+
+  // Keyboard shortcut
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Escape') closeModal();
+    if (e.key === 'n' && !e.target.matches('input,textarea,select')) openModal();
+  });
+
+  document.getElementById('search').addEventListener('input', render);
+  document.getElementById('filter-status').addEventListener('change', render);
+  document.getElementById('filter-rubro').addEventListener('change', render);
+
+  render();
+</script>
+</body>
+</html>
