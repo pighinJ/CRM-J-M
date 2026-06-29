@@ -428,6 +428,63 @@
   .kanban-card-contact { font-size: 11px; color: var(--text2); }
   .kanban-empty { padding: 20px 12px; text-align: center; font-size: 11px; color: var(--text3); }
 
+  /* EMAIL MODAL */
+  .email-preview {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 14px;
+    font-size: 12px;
+    color: var(--text2);
+    line-height: 1.7;
+    white-space: pre-wrap;
+    max-height: 220px;
+    overflow-y: auto;
+    font-family: 'Inter', sans-serif;
+  }
+  .email-field {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 9px 12px;
+    color: var(--text);
+    font-size: 13px;
+    font-family: 'Inter', sans-serif;
+    width: 100%;
+    outline: none;
+  }
+  .email-field:focus { border-color: var(--accent); }
+  .btn-gmail {
+    background: #ea4335;
+    border: none;
+    border-radius: var(--radius);
+    padding: 9px 18px;
+    color: #fff;
+    font-size: 13px;
+    font-family: 'Inter', sans-serif;
+    font-weight: 600;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    transition: background .2s, transform .1s;
+  }
+  .btn-gmail:hover { background: #c5221f; }
+  .btn-gmail:active { transform: scale(0.97); }
+  .no-email-warn {
+    background: var(--yellow-bg);
+    border: 1px solid rgba(245,158,11,0.25);
+    border-radius: var(--radius);
+    padding: 10px 14px;
+    font-size: 12px;
+    color: var(--yellow);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .btn-icon.email:hover { border-color: #ea4335; color: #ea4335; background: rgba(234,67,53,0.1); }
+  .char-count { font-size: 11px; color: var(--text3); text-align: right; margin-top: 3px; }
+
   @media (max-width: 900px) {
     .kanban-board { grid-template-columns: repeat(2, 1fr); }
     th:nth-child(5), td:nth-child(5),
@@ -730,6 +787,9 @@
         </td>
         <td>
           <div class="actions">
+            <button class="btn-icon email" title="Enviar email" onclick="openEmailModal(${p.id})">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>
+            </button>
             <button class="btn-icon" title="Editar" onclick="editProspecto(${p.id})">
               <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
             </button>
@@ -853,6 +913,161 @@
   document.getElementById('filter-rubro').addEventListener('change', render);
 
   render();
+</script>
+<!-- EMAIL MODAL -->
+<div class="modal-overlay" id="email-modal-overlay" onclick="closeEmailModalOutside(event)">
+  <div class="modal" style="max-width:580px">
+    <div class="modal-header">
+      <h2>✉️ Enviar email a prospecto</h2>
+      <button class="btn-icon" onclick="closeEmailModal()">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6 6 18M6 6l12 12"/></svg>
+      </button>
+    </div>
+    <div class="modal-body">
+      <div id="email-no-mail-warn" class="no-email-warn" style="display:none">
+        ⚠️ Este prospecto no tiene email cargado. Agregalo en el perfil primero.
+      </div>
+      <div class="form-group">
+        <label>Para</label>
+        <input type="text" id="em-to" class="email-field" placeholder="email@negocio.com">
+      </div>
+      <div class="form-group">
+        <label>Asunto</label>
+        <input type="text" id="em-subject" class="email-field">
+      </div>
+      <div class="form-group">
+        <label>Cuerpo del email <span style="color:var(--text3);font-weight:400;text-transform:none;font-size:10px">(editable)</span></label>
+        <textarea id="em-body" style="min-height:200px;background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);padding:12px;color:var(--text);font-size:13px;font-family:'Inter',sans-serif;outline:none;width:100%;resize:vertical;line-height:1.7;" oninput="updateCharCount()"></textarea>
+        <div class="char-count"><span id="char-count">0</span> caracteres</div>
+      </div>
+      <div style="font-size:11px;color:var(--text3);padding:8px 12px;background:var(--surface2);border-radius:var(--radius);border:1px solid var(--border)">
+        💡 Al hacer clic en <strong style="color:var(--text2)">Abrir en Gmail</strong> se va a abrir una pestaña nueva con el borrador listo para revisar y enviar desde <strong style="color:var(--accent)">Jmwebestudio@gmail.com</strong>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-secondary" onclick="closeEmailModal()">Cancelar</button>
+      <button class="btn-secondary" onclick="resetEmailTemplate()" style="gap:5px;display:flex;align-items:center">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>
+        Resetear plantilla
+      </button>
+      <button class="btn-gmail" id="btn-abrir-gmail" onclick="abrirGmail()">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>
+        Abrir en Gmail
+      </button>
+    </div>
+  </div>
+</div>
+
+<script>
+  let emailProspectoId = null;
+
+  function getPlantilla(p) {
+    return `Hola, buenos días!
+
+Me comunico desde J&M Web Studio, una agencia de desarrollo web y sistemas digitales.
+
+Noté que ${p.nombre} no cuenta con presencia digital propia, y quería comentarles que hoy en día la mayoría de los clientes busca información online antes de visitar o llamar a un negocio.
+
+En J&M Web Studio podemos ayudarlos con:
+
+${p.servicio ? '✅ ' + p.servicio : '✅ Diseño web profesional\n✅ Sistemas a medida (stock, turnos, presupuestos)\n✅ Integración con WhatsApp y redes sociales'}
+
+Todo con soporte mensual incluido y precios accesibles.
+
+¿Les interesaría que les enviemos más información o un presupuesto sin compromiso?
+
+Quedamos a disposición.
+
+Saludos,
+Jere — J&M Web Studio
+📧 Jmwebestudio@gmail.com
+🌐 jmwebestudio.com`;
+  }
+
+  function getAsunto(p) {
+    return `Propuesta digital para ${p.nombre} — J&M Web Studio`;
+  }
+
+  function openEmailModal(id) {
+    const p = prospectos.find(x => x.id === id);
+    if (!p) return;
+    emailProspectoId = id;
+
+    const warn = document.getElementById('email-no-mail-warn');
+    const btnGmail = document.getElementById('btn-abrir-gmail');
+
+    if (!p.email) {
+      warn.style.display = 'flex';
+      btnGmail.disabled = true;
+      btnGmail.style.opacity = '0.5';
+    } else {
+      warn.style.display = 'none';
+      btnGmail.disabled = false;
+      btnGmail.style.opacity = '1';
+    }
+
+    document.getElementById('em-to').value = p.email || '';
+    document.getElementById('em-subject').value = getAsunto(p);
+    document.getElementById('em-body').value = getPlantilla(p);
+    updateCharCount();
+    document.getElementById('email-modal-overlay').classList.add('open');
+  }
+
+  function closeEmailModal() {
+    document.getElementById('email-modal-overlay').classList.remove('open');
+    emailProspectoId = null;
+  }
+
+  function closeEmailModalOutside(e) {
+    if (e.target === document.getElementById('email-modal-overlay')) closeEmailModal();
+  }
+
+  function resetEmailTemplate() {
+    const p = prospectos.find(x => x.id === emailProspectoId);
+    if (!p) return;
+    document.getElementById('em-subject').value = getAsunto(p);
+    document.getElementById('em-body').value = getPlantilla(p);
+    updateCharCount();
+  }
+
+  function updateCharCount() {
+    const body = document.getElementById('em-body').value;
+    document.getElementById('char-count').textContent = body.length;
+  }
+
+  function abrirGmail() {
+    const to = document.getElementById('em-to').value.trim();
+    const subject = document.getElementById('em-subject').value.trim();
+    const body = document.getElementById('em-body').value.trim();
+
+    if (!to) { alert('Completá el email del destinatario primero.'); return; }
+
+    const gmailUrl = `https://mail.google.com/mail/?view=cm&fs=1&to=${encodeURIComponent(to)}&su=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}&from=Jmwebestudio@gmail.com`;
+
+    window.open(gmailUrl, '_blank');
+
+    // Marcar como contactado automáticamente
+    const p = prospectos.find(x => x.id === emailProspectoId);
+    if (p && p.status === 'contactar') {
+      p.status = 'contactado';
+      if (!p.canal) p.canal = 'Email';
+      save();
+      render();
+      toast('📧 Gmail abierto · Estado actualizado a Contactado');
+    } else {
+      toast('📧 Gmail abierto con el borrador listo');
+    }
+
+    closeEmailModal();
+  }
+
+  // ESC cierra email modal también
+  const _origKeydown = document.onkeydown;
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Escape') {
+      closeEmailModal();
+    }
+  });
 </script>
 </body>
 </html>
